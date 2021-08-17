@@ -1,50 +1,46 @@
 package controllers;
 
 import models.Music;
-import models.MusicForm;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import services.MusicServices;
 
 import java.io.File;
-import java.util.List;
+import java.io.IOException;
 
+@Controller
 public class MusicController {
-    @Value("${file-upload}")
-    private String fileUpload;
+    MusicServices musicServices = new MusicServices();
 
-    private final MusicServices musicServices = new MusicServices();
-
-    @GetMapping("/home")
-    public ModelAndView index(){
-        List<Music> list = musicServices.findAll();
+    @RequestMapping("/home")
+    public ModelAndView home(){
         ModelAndView modelAndView = new ModelAndView("show");
-        modelAndView.addObject("musics",list);
+        modelAndView.addObject("list",musicServices.list);
         return modelAndView;
     }
-    @GetMapping("/create")
-    public ModelAndView showCreateForm(@ModelAttribute("musicForm") MusicForm form){
-        ModelAndView modelAndView = new ModelAndView("create");
-        return modelAndView;
-    }
-    @PostMapping("/save")
-    public ModelAndView saveProduct(@ModelAttribute("musicForm") MusicForm form){
-        MultipartFile multipartFile = form.getLink();
-        String fileName = multipartFile.getOriginalFilename();
-        try{
-            FileCopyUtils.copy(form.getLink().getBytes(),new File(fileUpload,fileName));
-        } catch (Exception e){
-            e.printStackTrace();
+
+    @PostMapping("create")
+    public String create(@ModelAttribute Music music, @RequestParam MultipartFile uppMusic){
+        String nameMusic = uppMusic.getOriginalFilename();
+        try {
+            FileCopyUtils.copy(uppMusic.getBytes(), new File("D:\\JavaProject\\Spring_UploadMusic\\src\\main\\webapp\\music/" + nameMusic));
+            String urlImg = "/music/" + nameMusic;
+            music.setLink(urlImg);
+        } catch (IOException e) {
+            System.err.println("chưa uppload file");
         }
-        Music music = new Music(form.getId(),form.getName(),form.getSinger(),fileName);
         musicServices.save(music);
-        ModelAndView modelAndView = new ModelAndView("redirect:/home");
-        modelAndView.addObject("message", "Create success");
+        return "redirect:/home";
+    }
+
+    @GetMapping("/create")
+    public ModelAndView showCreate() {
+        ModelAndView modelAndView = new ModelAndView("create");
+        modelAndView.addObject("list", new Music());
+
         return modelAndView;
     }
 }

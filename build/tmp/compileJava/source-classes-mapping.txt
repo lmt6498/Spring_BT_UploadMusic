@@ -1,12 +1,10 @@
-models/MusicForm.java
- models.MusicForm
+config/ApplicationInitializer.java
+ config.ApplicationInitializer
 controllers/MusicController.java
  controllers.MusicController
 services/MusicServices.java
  services.MusicServices
 models/Music.java
  models.Music
-config/ApplicationInitializer.java
- config.ApplicationInitializer
 config/ApplicationConfig.java
  config.ApplicationConfig
